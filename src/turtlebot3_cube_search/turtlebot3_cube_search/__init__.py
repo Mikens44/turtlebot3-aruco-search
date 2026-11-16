@@ -1,0 +1,1 @@
+"""Autonomous visual cube search."""

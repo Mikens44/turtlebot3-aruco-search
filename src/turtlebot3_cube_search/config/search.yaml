@@ -1,0 +1,46 @@
+aruco_detector:
+  ros__parameters:
+    # Mandatory: overwrite through launch marker_size:=... (printed black square side, metres).
+    marker_size: 0.0
+    # Existing TF optical frame: OpenCV axes are X right, Y down, Z forward.
+    optical_frame: camera_rgb_optical_frame
+    max_reprojection_error: 2.5
+    min_range: 0.1
+    max_range: 5.0
+    # [-1] accepts all DICT_ARUCO_ORIGINAL IDs; otherwise list the five known IDs.
+    allowed_ids: [-1]
+
+cube_localizer:
+  ros__parameters:
+    map_frame: map
+    min_observations: 5
+    window_size: 30
+    inlier_radius: 0.15
+    max_spread: 0.08
+    min_interval: 0.15
+    min_duration: 0.8
+    max_sample_age: 20.0
+    tf_wait_timeout: 0.5
+    max_measurement_age: 2.0
+    max_reprojection_error: 2.5
+    pending_queue_size: 100
+    # Offset from marker centre to reported cube point, in marker axes (metres).
+    marker_to_cube_offset: [0.0, 0.0, 0.0]
+
+cube_search_server:
+  ros__parameters:
+    map_frame: map
+    base_frame: base_footprint
+    grid_spacing: 1.0
+    # Conservative circumscribed radius: verify with the actual Waffle footprint.
+    robot_radius: 0.30
+    safety_margin: 0.10
+    free_threshold: 20
+    default_timeout: 600.0
+    startup_timeout: 15.0
+    planning_timeout: 10.0
+    navigation_timeout: 90.0
+    spin_timeout: 45.0
+    stop_timeout: 5.0
+    pose_max_age: 1.0
+    planner_id: ''

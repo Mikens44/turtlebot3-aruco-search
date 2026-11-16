@@ -1,0 +1,21 @@
+# Wall-clock limit in seconds; 0 selects the configured default.
+float64 timeout_sec
+---
+uint8 SUCCESS=0
+uint8 TIMEOUT=1
+uint8 EXHAUSTED=2
+uint8 CANCELED=3
+uint8 DEPENDENCY_ERROR=4
+uint8 MAP_ERROR=5
+uint8 TF_ERROR=6
+uint8 STOP_FAILED=7
+uint8 INTERNAL_ERROR=8
+uint8 code
+string message
+# On success exactly five unique IDs; on failure the partial result.
+cube_search_interfaces/CubeArray cubes
+---
+uint32 found_count
+uint32 visited_points
+uint32 total_points
+string phase

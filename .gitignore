@@ -1,0 +1,53 @@
+# ROS 2 / colcon build artifacts
+build/
+install/
+log/
+
+# Python caches, environments and test results
+__pycache__/
+.pytest_cache/
+*.py[cod]
+*.egg-info/
+.eggs/
+.venv/
+venv/
+dist/
+.coverage
+.coverage.*
+htmlcov/
+test-results/
+
+# Local IDE, agent and operating-system state
+.vscode/
+.idea/
+.agents/
+.codex/
+.DS_Store
+Thumbs.db
+
+# Credentials and local environment files
+.aws/
+.ssh/
+.env
+.env.*
+!.env.example
+.netrc
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+
+# Temporary files and recorded sensor data
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+*.log
+*.bag
+*.db3
+*.db3-shm
+*.db3-wal
+*.mcap
