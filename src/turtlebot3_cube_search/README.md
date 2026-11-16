@@ -89,9 +89,10 @@ Testy obejmują syntetyczne obrazy ArUco i metryczną estymację pozy, filtracj�
 pozycji, geometrię mapy, obsługę nieznanych komórek, osiągalność, wyścigi anulowania
 oraz integrację ROS z atrapami akcji Nav2. Dodatkowy test uruchamia trzy procesy
 przez launch i sprawdza ich zamknięcie po SIGINT. Atrapy nie testują fizyki ani Nav2.
-Końcowy przebieg: **47 testów, zero błędów, zero pominiętych**. Testy sprawdzają
+Końcowy przebieg: **48 testów, zero błędów, zero pominiętych**. Testy sprawdzają
 również oznaczenie pozy i orientacji układem optycznym, zachowanie timestampu,
-zgłoszony pomiar przy podłodze oraz przekazanie parametru `optical_frame` przez launch. Szczegóły
+zgłoszony pomiar przy podłodze, przekazanie parametru `optical_frame` przez launch
+oraz skalę pozycji przy rozmiarze wzoru około 7 cm na kostce 9 cm. Szczegóły
 wykonanych sprawdzeń są zapisane w `VALIDATION.md` w workspace.
 
 ## Wymagania uruchomieniowe
@@ -172,12 +173,14 @@ na kolizję i wtedy punkt zostanie pominięty. Przy małej prędkości zwiększ 
 
 ## Uruchomienie zadania
 
-Zmierz bok czarnego kwadratu markera (bez białego marginesu). Przykład dla 8 cm:
+Zmierz bok czarnego kwadratu markera (bez białego marginesu). W modelach
+`arm05_sim` kostka ma bok 9 cm, ale czarny wzór zajmuje 588 z 755 pikseli
+tekstury, więc jego bok wynosi około 7 cm. Dla tych modeli:
 
 ```bash
 source install/setup.bash
 ros2 launch turtlebot3_cube_search cube_search.launch.py \
-  marker_size:=0.08 optical_frame:=camera_rgb_optical_frame use_sim_time:=true
+  marker_size:=0.07 optical_frame:=camera_rgb_optical_frame use_sim_time:=true
 ```
 
 Na fizycznym robocie użyj `use_sim_time:=false`. Cały system musi mieć zgodny czas;
@@ -186,7 +189,11 @@ w symulacji wymagany jest `/clock`. Nazwy tematów i akcji można przekazać arg
 `spin_action`; nazwy TF argumentami `map_frame`, `base_frame` i `optical_frame`.
 `optical_frame` ma domyślnie wartość `camera_rgb_optical_frame` zarówno w node,
 YAML, jak i launch. Wybór tej nazwy nie tworzy nowego TF.
-`marker_size` jest obowiązkowy — wartość 0 z samego YAML powoduje błąd startu.
+Argument launch `marker_size` nadal jest obowiązkowy. W dostarczonym YAML
+ustawiono `0.07` dla `arm05_sim`; inne modele wymagają własnego pomiaru.
+Sam detektor bez parametrów ma wartość 0 i zgłosi błąd startu.
+Po zmianie rozmiaru anuluj aktywne zadanie i zrestartuj lokalizator lub wywołaj
+`/cube_localizer/reset` podczas bezczynności, aby usunąć stare potwierdzenia.
 Parametry wczytywane są przy starcie; zmiany wymagają ponownego uruchomienia node'ów.
 
 W drugim terminalu z tym samym underlay i overlay:

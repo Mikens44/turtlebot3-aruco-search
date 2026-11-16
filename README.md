@@ -6,15 +6,17 @@ znaczników, a lidar do lokalizacji robota i nawigacji przez Nav2.
 
 ## Zabezpieczona wersja bazowa
 
-Pierwszy commit zachowuje kod **sprzed poprawki rozmiaru markera**.
+Pierwszy commit `6548530` zachowuje kod **sprzed poprawki rozmiaru markera**.
 Użytkownik potwierdził w ROS 2 Jazzy + Gazebo Harmonic znalezienie pięciu ID
 i zakończenie `/find_cubes` statusem `SUCCEEDED`, kodem `0` oraz komunikatem
 `Confirmed five distinct marker IDs`.
 
 W tym przebiegu użyto `marker_size:=0.09`. Współrzędne miały średni błąd XY
 około 1.07 m. Analiza modeli wykazała, że 0.09 m to bok kostki, a wzór ArUco
-ma bok około 0.07 m. Ta korekta jest zaplanowana jako **osobny commit po
-utworzeniu repozytorium**; nie została wprowadzona do tej wersji bazowej.
+ma bok około 0.07 m. Korektę konfiguracji i instrukcji na `marker_size:=0.07`
+wprowadzono w osobnym commicie po publikacji wersji bazowej. Zabezpieczony
+pierwszy commit pozostaje bez zmian. Po korekcie nie wykonano jeszcze ponownie
+pełnej misji w Gazebo ani pomiaru końcowej dokładności.
 Szczegóły przebiegu i ograniczenia: [BASELINE.md](BASELINE.md).
 
 ## Architektura
@@ -66,7 +68,7 @@ Polecenie `rosdep` wymaga wcześniej skonfigurowanego narzędzia i aktualnej baz
 zależności. Pakiety TurtleBot3, konfigurację kamery i bringup Nav2 przygotuj
 zgodnie z własnym środowiskiem.
 
-## Odtworzenie uruchomienia wersji bazowej
+## Uruchomienie z poprawionym rozmiarem markera
 
 Najpierw uruchom symulację, kamerę, mapę, lokalizację i Nav2. Następnie:
 
@@ -74,7 +76,7 @@ Najpierw uruchom symulację, kamerę, mapę, lokalizację i Nav2. Następnie:
 source /opt/ros/jazzy/setup.bash
 source install/setup.bash
 ros2 launch turtlebot3_cube_search cube_search.launch.py \
-  marker_size:=0.09 optical_frame:=camera_rgb_optical_frame use_sim_time:=true
+  marker_size:=0.07 optical_frame:=camera_rgb_optical_frame use_sim_time:=true
 ```
 
 W drugim terminalu, po wczytaniu tego samego środowiska:
@@ -85,7 +87,16 @@ ros2 action send_goal /find_cubes cube_search_interfaces/action/FindCubes \
 ros2 topic echo /cubes --qos-durability transient_local
 ```
 
-`0.09` powyżej celowo odtwarza historyczną wersję bazową i jej błąd skali.
+`0.07` odpowiada wzorowi w modelach `arm05_sim`, bez białego marginesu.
+Przed ponownym wyszukiwaniem anuluj poprzednią misję i uruchom ponownie
+lokalizator lub wyczyść jego obserwacje podczas bezczynności:
+
+```bash
+ros2 service call /cube_localizer/reset std_srvs/srv/Trigger '{}'
+```
+
+W przeciwnym razie wcześniej potwierdzone, błędne pozycje pozostaną w pamięci.
+Odtworzenie wersji bazowej z `0.09` opisuje [BASELINE.md](BASELINE.md).
 Dla innych modeli należy zmierzyć bok samego wzoru z czarnym obramowaniem,
 bez białego marginesu. Na fizycznym robocie użyj `use_sim_time:=false`.
 Domyślnie raportowany jest środek markera; offset do środka kostki jest
@@ -99,9 +110,10 @@ colcon test --packages-select cube_search_interfaces turtlebot3_cube_search --ev
 colcon test-result --verbose
 ```
 
-Ostatni wykonany przebieg automatyczny: **47 testów, zero błędów i pominiętych**.
+Ostatni wykonany przebieg automatyczny: **48 testów, zero błędów i pominiętych**.
 Obejmuje detekcję, filtrację, transformacje optyczne i czasowe, siatkę,
-anulowanie celów, atrapy Nav2 i uruchamianie przez launch.
+anulowanie celów, atrapy Nav2 i uruchamianie przez launch. Regresja rozmiaru
+sprawdza metryczną pozycję na podstawie proporcji wzoru do tekstury `arm05_sim`.
 [VALIDATION.md](VALIDATION.md) opisuje środowisko i granice tych testów.
 
 Sukces pełnej misji w Gazebo zgłosił użytkownik; nie jest on równoznaczny

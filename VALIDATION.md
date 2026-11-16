@@ -1,9 +1,12 @@
 # Wyniki walidacji
 
-Weryfikację, w tym poprawkę układu optycznego z 2026-11-16, wykonano w tymczasowych kontenerach z istniejącego,
+Weryfikację, w tym poprawki układu optycznego i rozmiaru wzoru z 2026-11-16,
+wykonano w tymczasowych kontenerach z istniejącego,
 lokalnego obrazu `arm/lab05`. Nie instalowano ROS ani bibliotek na hoście.
 Kontenery miały wyłączoną sieć zewnętrzną, workspace zamontowany jako `/ws`
-i osobny `ROS_DOMAIN_ID=93` dla testów.
+i `ROS_DOMAIN_ID=93` dla launch. Przypadki integracyjne używają oddzielnych
+domen DDS od 100, aby ponowne używanie nazw atrap Nav2 nie mieszało discovery
+pomiędzy kolejnymi testami.
 
 ## Potwierdzone środowisko
 
@@ -40,13 +43,13 @@ Końcowe wyniki:
 
 ```text
 Summary: 2 packages finished
-47 passed
-Summary: 47 tests, 0 errors, 0 failures, 0 skipped
+48 passed in 21.41s
+Summary: 48 tests, 0 errors, 0 failures, 0 skipped
 ```
 
 | Grupa | Liczba | Zakres |
 |---|---:|---|
-| Detektor | 7 | Syntetyczny marker, ID, głębokość metryczna, zakres, kwaterniony, walidacja rozmiaru |
+| Detektor | 8 | Syntetyczny marker, ID, głębokość metryczna, zakres, kwaterniony, walidacja rozmiaru i regresja skali arm05_sim |
 | Układ detekcji | 3 | Domyślny i własny optical_frame, zachowanie timestampu i nagłówków źródłowych, brak dodatkowego obrotu pozy i orientacji |
 | Estymator | 6 | Szum, odstające pomiary, duplikaty, czas, rozrzut, reset i brak skoków pozycji |
 | Siatka | 4 | Obrócony początek mapy, przeszkody, nieznane komórki, margines, rozłączność i narożniki |
@@ -85,8 +88,25 @@ robota w teście. Zachowano też test transformacji w czasie pomiaru, zamiast
 używania najnowszego TF, oraz test całego łańcucha obraz–detekcja–lokalizacja
 z mechanicznym frame_id na wejściu i obróconym TF optycznym.
 
-Algorytm eksploracji, warunki zakończenia akcji, rozmiar markera i progi
-potwierdzania w kodzie produkcyjnym oraz konfiguracji pozostały bez zmian.
+W samej poprawce ramki optycznej algorytm eksploracji, warunki zakończenia
+akcji, rozmiar markera i progi potwierdzania pozostały bez zmian.
+
+## Osobna poprawka: rozmiar wzoru arm05_sim
+
+Po publikacji wersji bazowej `6548530` ustawiono w YAML `marker_size: 0.07`
+i zaktualizowano instrukcje uruchomienia do `marker_size:=0.07`.
+Nie zmieniono kodu node'ów, launch, interfejsów ani progów potwierdzania.
+
+Nowy test wyznacza narożniki dla wzoru o boku `0.09 * 588 / 755` m,
+umieszczonego na głębokości 3.8 m. Rozmiar PnP odczytuje z rzeczywistego YAML.
+Przy ustawieniu 0.07 m błąd pozycji w idealnych danych wynosi około 5 mm
+(test wymaga mniej niż 1 cm). Dawne 0.09 m daje ponad 1 m błędu dla tych samych
+narożników. Test nie wymaga dołączania zewnętrznych modeli ani tekstur.
+
+Wyniki te dotyczą testu numerycznego i zestawu automatycznego. Po poprawce
+rozmiaru nie wykonano ponownie pełnej misji w Gazebo ani pomiaru dokładności
+pięciu kostek. Sukces misji z rozmiarem 0.09 m zgłosił użytkownik i zapisano go
+w `BASELINE.md`; ten historyczny dokument nie został zmieniony.
 
 Raport pytest: `build/turtlebot3_cube_search/pytest.xml`.
 Logi ostatniego przebiegu colcon: `log/latest_test/` i `log/latest_build/`.

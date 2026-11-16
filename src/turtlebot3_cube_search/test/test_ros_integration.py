@@ -5,6 +5,7 @@ not navigation quality or physical stopping.
 """
 
 from copy import deepcopy
+from itertools import count
 import math
 import threading
 import time
@@ -36,6 +37,9 @@ from turtlebot3_cube_search.cube_search_server import CubeSearchServer
 from test_detection import marker_image
 
 
+_test_domains = count(100)
+
+
 def wait_until(predicate, timeout=4.0):
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
@@ -52,7 +56,9 @@ def future_result(future, timeout=5.0):
 
 @pytest.fixture
 def runtime():
-    rclpy.init()
+    # Each case recreates identically named Nav2 actions. Isolate DDS discovery
+    # so a disappearing server from the previous case cannot satisfy readiness.
+    rclpy.init(domain_id=next(_test_domains))
     executor = MultiThreadedExecutor(num_threads=8)
     spin_stop = threading.Event()
     spin_errors = []

@@ -1,8 +1,10 @@
 import math
+from pathlib import Path
 
 import cv2
 import numpy as np
 import pytest
+import yaml
 
 from turtlebot3_cube_search.detection import MarkerDetector, rotation_to_quaternion
 
@@ -35,6 +37,29 @@ def test_blank_and_out_of_range():
     detector = MarkerDetector(.12, max_range=.3)
     assert detector.detect(marker_image(), matrix, np.zeros(5)) == []
     assert detector.detect(np.full((480, 640), 255, np.uint8), matrix, np.zeros(5)) == []
+
+
+def test_configured_scale_matches_arm05_marker_instead_of_cube():
+    # arm05_sim: a 9 cm cube face maps a 755 px texture containing a 588 px marker.
+    # Generate ideal image corners independently of the configured PnP size.
+    half = (.09 * 588 / 755) / 2
+    points = np.array([[-half, half, 0], [half, half, 0],
+                       [half, -half, 0], [-half, -half, 0]], dtype=np.float64)
+    matrix = np.array([[1696.80279, 0, 960], [0, 1696.80267, 540], [0, 0, 1.]])
+    truth = np.array([.1, .1, 3.8])
+    corners, _ = cv2.projectPoints(points, np.array([3., .1, .05]), truth, matrix, np.zeros(5))
+    config_path = Path(__file__).resolve().parents[1] / 'config' / 'search.yaml'
+    configured_size = yaml.safe_load(config_path.read_text())['aruco_detector']['ros__parameters'][
+        'marker_size']
+    detector = MarkerDetector(configured_size)
+    detector.detect_corners = lambda _: ([corners.reshape(1, 4, 2)], np.array([[0]]), [])
+    result = detector.detect(np.zeros((1, 1), np.uint8), matrix, np.zeros(5))[0]
+    assert np.linalg.norm(result.translation - truth) < .01
+    # The historical 9 cm assumption yields ~1.08 m error even with ideal corners.
+    wrong = MarkerDetector(.09)
+    wrong.detect_corners = detector.detect_corners
+    biased = wrong.detect(np.zeros((1, 1), np.uint8), matrix, np.zeros(5))[0]
+    assert np.linalg.norm(biased.translation - truth) > 1.0
 
 
 def test_quaternion_identity_and_half_turn():

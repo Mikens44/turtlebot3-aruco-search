@@ -1,7 +1,8 @@
 aruco_detector:
   ros__parameters:
-    # Mandatory: overwrite through launch marker_size:=... (printed black square side, metres).
-    marker_size: 0.0
+    # arm05_sim: black ArUco square is ~7 cm; the 9 cm cube includes white margins.
+    # The launch still requires an explicit marker_size argument for other models.
+    marker_size: 0.07
     # Existing TF optical frame: OpenCV axes are X right, Y down, Z forward.
     optical_frame: camera_rgb_optical_frame
     max_reprojection_error: 2.5
