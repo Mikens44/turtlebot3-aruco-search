@@ -93,7 +93,8 @@ Końcowy przebieg: **48 testów, zero błędów, zero pominiętych**. Testy spra
 również oznaczenie pozy i orientacji układem optycznym, zachowanie timestampu,
 zgłoszony pomiar przy podłodze, przekazanie parametru `optical_frame` przez launch
 oraz skalę pozycji przy rozmiarze wzoru około 7 cm na kostce 9 cm. Szczegóły
-wykonanych sprawdzeń są zapisane w `VALIDATION.md` w workspace.
+wykonanych sprawdzeń i wynik pełnego eksperymentu w Gazebo są zapisane
+w [głównym README](../../README.md#testy-automatyczne).
 
 ## Wymagania uruchomieniowe
 
@@ -297,5 +298,9 @@ Launch daje serwerowi 15 s przed eskalacją do SIGTERM. Jeśli zwiększasz
 8. Sprawdź niedostępny punkt, utratę TF, zatrzymany zegar, błędną kalibrację
    i odrzucenie drugiego zadania. Po każdej zmianie sceny resetuj stan.
 
-Ta procedura wymaga wykonania w rzeczywistej symulacji. Syntetyczny test ROS
-z atrapami akcji nie jest potwierdzeniem działania TurtleBot3 w Gazebo.
+Pełna misja w Gazebo Harmonic została wykonana: robot autonomicznie odnalazł
+pięć ID, a akcja zakończyła się `SUCCEEDED` z kodem 0. Wyniki dokładności po
+poprawce `marker_size:=0.07` znajdują się w
+[głównym README](../../README.md#wyniki-końcowego-eksperymentu-w-gazebo).
+Pozostałe próby diagnostyczne i awaryjne z tej procedury wymagają oddzielnej
+weryfikacji w symulacji; syntetyczne testy z atrapami Nav2 jej nie zastępują.
